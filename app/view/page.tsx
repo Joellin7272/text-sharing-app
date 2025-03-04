@@ -9,6 +9,7 @@ interface Text {
   id: string;
   content: string;
   createdAt: number;
+  status: string;
 }
 
 export default function ViewPage() {
@@ -18,25 +19,35 @@ export default function ViewPage() {
 
   useEffect(() => {
     try {
+      // 簡化查詢，只按時間排序
       const q = query(
         collection(db, 'texts'),
         where('status', '==', 'published'),
         orderBy('createdAt', 'desc')
       );
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const textsData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Text[];
-        setTexts(textsData);
-        setLoading(false);
-      });
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const textsData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          })) as Text[];
+          console.log('Fetched texts:', textsData); // 添加日誌
+          setTexts(textsData);
+          setLoading(false);
+        },
+        (err) => {
+          console.error('Firestore error:', err); // 添加錯誤日誌
+          setError('載入數據時發生錯誤');
+          setLoading(false);
+        }
+      );
 
       return () => unsubscribe();
     } catch (err) {
-      console.error('Error fetching texts:', err);
-      setError('載入數據時發生錯誤');
+      console.error('Setup error:', err);
+      setError('設置連接時發生錯誤');
       setLoading(false);
     }
   }, []);
