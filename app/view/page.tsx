@@ -19,9 +19,9 @@ export default function ViewPage() {
 
   useEffect(() => {
     try {
+      // 先只按時間排序
       const q = query(
         collection(db, 'texts'),
-        where('status', '==', 'published'),
         orderBy('createdAt', 'desc')
       );
 
@@ -32,8 +32,10 @@ export default function ViewPage() {
             id: doc.id,
             ...doc.data()
           })) as Text[];
-          console.log('Fetched texts:', textsData);
-          setTexts(textsData);
+          // 在前端過濾已發布的文本
+          const publishedTexts = textsData.filter(text => text.status === 'published');
+          console.log('Fetched texts:', publishedTexts);
+          setTexts(publishedTexts);
           setLoading(false);
         },
         (err) => {
