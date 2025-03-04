@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore';
-import { toast } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 
 interface Text {
   id: string;
@@ -19,7 +19,6 @@ export default function ViewPage() {
 
   useEffect(() => {
     try {
-      // 簡化查詢，只按時間排序
       const q = query(
         collection(db, 'texts'),
         where('status', '==', 'published'),
@@ -33,12 +32,12 @@ export default function ViewPage() {
             id: doc.id,
             ...doc.data()
           })) as Text[];
-          console.log('Fetched texts:', textsData); // 添加日誌
+          console.log('Fetched texts:', textsData);
           setTexts(textsData);
           setLoading(false);
         },
         (err) => {
-          console.error('Firestore error:', err); // 添加錯誤日誌
+          console.error('Firestore error:', err);
           setError('載入數據時發生錯誤');
           setLoading(false);
         }
@@ -114,6 +113,7 @@ export default function ViewPage() {
           </div>
         )}
       </div>
+      <Toaster position="bottom-right" />
     </div>
   );
 } 
